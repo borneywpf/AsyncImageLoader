@@ -31,7 +31,6 @@ import java.lang.ref.WeakReference;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * This class wraps up completing some arbitrary long running work when loading a bitmap to an
@@ -533,27 +532,5 @@ public abstract class ImageWorker {
 
     public void closeCache() {
         new CacheAsyncTask().execute(MESSAGE_CLOSE);
-    }
-
-    private static class ViewIdGenerator {
-        private static final AtomicInteger sNextGeneratedId = new AtomicInteger(1);
-
-        public static int generateViewId() {
-
-            if (BuildUtils.hasJellyBeanMR1()) {
-                return View.generateViewId();
-            } else {
-                for (;;) {
-                    final int result = sNextGeneratedId.get();
-                    // aapt-generated IDs have the high byte nonzero; clamp to the range under that.
-                    int newValue = result + 1;
-                    if (newValue > 0x00FFFFFF)
-                        newValue = 1; // Roll over to 1, not 0.
-                    if (sNextGeneratedId.compareAndSet(result, newValue)) {
-                        return result;
-                    }
-                }
-            }
-        }
     }
 }
